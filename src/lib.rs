@@ -243,6 +243,23 @@ where
     }
 }
 
+impl<T, U> Eq for OrderBy<T, U>
+where
+    U: Fn(&T, &T) -> Ordering,
+{
+    fn assert_receiver_is_total_eq(&self) {}
+}
+
+impl<T, U> Ord for OrderBy<T, U>
+where
+    U: Fn(&T, &T) -> Ordering,
+{
+    #[inline]
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.partial_cmp(&other).unwrap()
+    }
+}
+
 /// A struct to order values by a custom key function
 pub struct OrderByKey<T, U, K: Ord> {
     val: T,

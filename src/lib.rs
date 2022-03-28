@@ -155,3 +155,45 @@ impl<T: Ord> Iterator for SortedHeapIter<T> {
         (exact, Some(exact))
     }
 }
+
+/// Custom struct to be able to compare items wich don't
+/// necessarily implement `Ord` themselves or are required
+/// to be sorted by an u32 instead of the `Ord` implementation
+#[derive(PartialEq, Eq)]
+pub struct CustomOrd<T> {
+    ord: u32,
+    val: T,
+}
+
+impl<T: PartialEq + Eq> CustomOrd<T> {
+    #[inline]
+    pub fn new(val: T, ord: u32) -> Self {
+        Self { ord, val }
+    }
+
+    /// Convert back to `T`
+    #[inline]
+    pub fn into_inner(self) -> T {
+        self.val
+    }
+
+    /// Get assigned score
+    #[inline]
+    pub fn ord(&self) -> u32 {
+        self.ord
+    }
+}
+
+impl<T: PartialEq + Eq> PartialOrd for CustomOrd<T> {
+    #[inline]
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.ord.cmp(&other.ord))
+    }
+}
+
+impl<T: PartialEq + Eq> Ord for CustomOrd<T> {
+    #[inline]
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.ord.cmp(&other.ord)
+    }
+}

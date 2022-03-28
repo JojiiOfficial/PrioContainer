@@ -129,7 +129,7 @@ mod tests {
     }
 }
 
-/// Iterator over a binary heap with in sorted order
+/// Iterator over a binary heap sorted
 pub struct SortedHeapIter<T> {
     inner: BinaryHeap<T>,
 }

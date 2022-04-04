@@ -1,4 +1,54 @@
-use std::collections::BinaryHeap;
+use std::{cmp::Reverse, collections::BinaryHeap};
+
+/// Priority container storing max `capacity` amount of items. Can be used to find
+/// `n` smallest items within an iterator or a set of items that implement `Ord`
+pub struct PrioContainerMax<T> {
+    container: PrioContainer<Reverse<T>>,
+}
+
+impl<T: Ord> PrioContainerMax<T> {
+    /// Create a new Max PrioContainer
+    pub fn new(capacity: usize) -> Self {
+        let container = PrioContainer::new(capacity);
+        Self { container }
+    }
+
+    pub fn insert(&mut self, item: T) {
+        self.container.insert(Reverse(item));
+    }
+
+    pub fn len(&self) -> usize {
+        self.container.len()
+    }
+
+    pub fn capacity(&self) -> usize {
+        self.container.capacity()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.container.is_empty()
+    }
+}
+
+impl<T: Ord> Extend<T> for PrioContainerMax<T> {
+    #[inline]
+    fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
+        for i in iter.into_iter() {
+            self.insert(i);
+        }
+    }
+}
+
+impl<T: Ord> IntoIterator for PrioContainerMax<T> {
+    type Item = Reverse<T>;
+
+    type IntoIter = SortedHeapIter<Reverse<T>>;
+
+    #[inline]
+    fn into_iter(self) -> Self::IntoIter {
+        SortedHeapIter::new(self.container.heap)
+    }
+}
 
 /// Priority container storing max `capacity` amount of items. Can be used to find
 /// `n` smallest items within an iterator or a set of items that implement `Ord`
@@ -83,7 +133,6 @@ impl<T: Ord> IntoIterator for PrioContainer<T> {
 mod tests {
     use super::*;
     use rand::{thread_rng, Rng};
-    use std::cmp::Reverse;
 
     fn generate_data(inp_len: usize) -> Vec<usize> {
         let mut input = vec![0usize; inp_len];
@@ -98,8 +147,8 @@ mod tests {
         expected.reverse();
         expected.truncate(capacity);
 
-        let mut prio_container = PrioContainer::new(capacity);
-        prio_container.extend(input.into_iter().map(|i| Reverse(i)));
+        let mut prio_container = PrioContainerMax::new(capacity);
+        prio_container.extend(input);
         let mut out = prio_container.into_iter().map(|i| i.0).collect::<Vec<_>>();
         out.reverse();
         assert_eq!(out, expected);

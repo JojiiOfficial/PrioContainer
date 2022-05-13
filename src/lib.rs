@@ -35,6 +35,11 @@ impl<T: Ord> PrioContainerMax<T> {
     pub fn is_empty(&self) -> bool {
         self.container.is_empty()
     }
+
+    #[inline]
+    pub fn total_pushed(&self) -> usize {
+        self.container.total_pushed()
+    }
 }
 
 impl<T: Ord> Extend<T> for PrioContainerMax<T> {
@@ -63,6 +68,7 @@ pub struct PrioContainer<T> {
     heap: BinaryHeap<T>,
     /// Max amount of items that will be returned in the end
     capacity: usize,
+    pushed: usize,
 }
 
 impl<T: Ord> PrioContainer<T> {
@@ -76,12 +82,17 @@ impl<T: Ord> PrioContainer<T> {
             panic!("Capacity can't be zero");
         }
         let heap = BinaryHeap::with_capacity(capacity);
-        Self { heap, capacity }
+        Self {
+            heap,
+            capacity,
+            pushed: 0,
+        }
     }
 
     /// Inserts a new Item into the queue.
     #[inline]
     pub fn insert(&mut self, item: T) -> bool {
+        self.pushed += 1;
         if self.heap.len() < self.capacity {
             self.heap.push(item);
             return true;
@@ -116,6 +127,12 @@ impl<T: Ord> PrioContainer<T> {
     #[inline]
     pub fn capacity(&self) -> usize {
         self.capacity
+    }
+
+    /// Returns the total amount of items pushed into the prio container
+    #[inline]
+    pub fn total_pushed(&self) -> usize {
+        self.pushed
     }
 
     /// Return a sorted vec of the prio container

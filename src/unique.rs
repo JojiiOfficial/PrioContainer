@@ -22,6 +22,7 @@ impl<T: Ord + PartialEq> UniquePrioContainer<T> {
             if self.contains(&item) {
                 return false;
             }
+            self.container.pushed+=1;
             self.container.heap.push(item);
             return true;
         }
@@ -30,7 +31,11 @@ impl<T: Ord + PartialEq> UniquePrioContainer<T> {
         //
         // heap.len() >= n without elements is impossible for n>0 which is enforced in `PrioContainer::new()`
         let min_item = unsafe { self.container.heap.peek().unwrap_unchecked() };
-        if *min_item <= item || self.contains(&item) {
+        let contains = self.contains(&item);
+        if *min_item <= item || contains {
+            if !contains{
+                self.container.pushed+=1;
+            }
             return false;
         }
 
@@ -56,6 +61,12 @@ impl<T: Ord + PartialEq> UniquePrioContainer<T> {
     #[inline]
     pub fn contains(&self, item: &T) -> bool {
         self.container.heap.iter().any(|i| i == item)
+    }
+
+    /// Returns the total amount of pushed items. Ignores duplicates
+    #[inline]
+    pub fn total_pushed(&self) -> usize {
+        self.container.total_pushed()
     }
 }
 
@@ -110,6 +121,12 @@ impl<T: Ord + PartialEq> UniquePrioContainerMax<T> {
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.container.is_empty()
+    }
+
+    /// Returns the total amount of pushed items. Ignores duplicates
+    #[inline]
+    pub fn total_pushed(&self) -> usize {
+        self.container.total_pushed()
     }
 }
 

@@ -1,3 +1,5 @@
+pub mod unique;
+
 use std::{cmp::Reverse, collections::BinaryHeap};
 
 /// Priority container storing max `capacity` amount of items. Can be used to find
@@ -8,23 +10,28 @@ pub struct PrioContainerMax<T> {
 
 impl<T: Ord> PrioContainerMax<T> {
     /// Create a new Max PrioContainer
+    #[inline]
     pub fn new(capacity: usize) -> Self {
         let container = PrioContainer::new(capacity);
         Self { container }
     }
 
-    pub fn insert(&mut self, item: T) {
-        self.container.insert(Reverse(item));
+    #[inline]
+    pub fn insert(&mut self, item: T) -> bool {
+        self.container.insert(Reverse(item))
     }
 
+    #[inline]
     pub fn len(&self) -> usize {
         self.container.len()
     }
 
+    #[inline]
     pub fn capacity(&self) -> usize {
         self.container.capacity()
     }
 
+    #[inline]
     pub fn is_empty(&self) -> bool {
         self.container.is_empty()
     }
@@ -74,19 +81,22 @@ impl<T: Ord> PrioContainer<T> {
 
     /// Inserts a new Item into the queue.
     #[inline]
-    pub fn insert(&mut self, item: T) {
+    pub fn insert(&mut self, item: T) -> bool {
         if self.heap.len() < self.capacity {
             self.heap.push(item);
-            return;
+            return true;
         }
 
         // Safety:
         //
         // heap.len() >= n without elements is impossible for n>0 which is enforced in `PrioContainer::new()`
         let mut min_item = unsafe { self.heap.peek_mut().unwrap_unchecked() };
-        if *min_item > item {
-            *min_item = item;
+        if *min_item <= item {
+            return false;
         }
+
+        *min_item = item;
+        true
     }
 
     /// Returns the amount of items in the container. This value
@@ -106,6 +116,12 @@ impl<T: Ord> PrioContainer<T> {
     #[inline]
     pub fn capacity(&self) -> usize {
         self.capacity
+    }
+
+    /// Return a sorted vec of the prio container
+    #[inline]
+    pub fn into_sorted_vec(self) -> Vec<T> {
+        self.heap.into_sorted_vec()
     }
 }
 

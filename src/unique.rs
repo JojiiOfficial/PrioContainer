@@ -1,6 +1,5 @@
-use std::cmp::Reverse;
-
 use crate::{PrioContainer, SortedHeapIter};
+use std::cmp::Reverse;
 
 /// Priority container storing max `capacity` amount of items. Can be used to find
 /// `n` smallest items within an iterator or a set of items that implement `Ord`
@@ -22,7 +21,7 @@ impl<T: Ord + PartialEq> UniquePrioContainer<T> {
             if self.contains(&item) {
                 return false;
             }
-            self.container.pushed+=1;
+            self.container.pushed += 1;
             self.container.heap.push(item);
             return true;
         }
@@ -33,8 +32,8 @@ impl<T: Ord + PartialEq> UniquePrioContainer<T> {
         let min_item = unsafe { self.container.heap.peek().unwrap_unchecked() };
         let contains = self.contains(&item);
         if *min_item <= item || contains {
-            if !contains{
-                self.container.pushed+=1;
+            if !contains {
+                self.container.pushed += 1;
             }
             return false;
         }

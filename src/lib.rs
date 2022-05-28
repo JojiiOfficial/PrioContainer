@@ -164,6 +164,10 @@ impl<T: Ord> IntoIterator for PrioContainer<T> {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
+    use crate::unique::UniquePrioContainerMax;
+
     use super::*;
     use rand::{thread_rng, Rng};
 
@@ -171,6 +175,32 @@ mod tests {
         let mut input = vec![0usize; inp_len];
         thread_rng().try_fill(&mut input[..]).unwrap();
         input
+    }
+
+    fn test_unique(inp_len: usize, capacity: usize) {
+        let mut input = generate_data(inp_len)
+            .into_iter()
+            // unique items only
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect::<Vec<_>>();
+
+        // add duplicates
+        for val in input.clone().into_iter().step_by(10) {
+            input.push(val);
+        }
+
+        let mut expected = input.clone();
+        expected.sort();
+        expected.reverse();
+        expected.truncate(capacity);
+
+        let mut prio_container = UniquePrioContainerMax::new(capacity);
+        prio_container.extend(input);
+
+        let collected: Vec<_> = prio_container.into_iter().collect();
+        let unique = collected.iter().copied().collect::<HashSet<_>>();
+        assert_eq!(unique.len(), collected.len());
     }
 
     fn test_max_with_capacity(inp_len: usize, capacity: usize) {
@@ -202,10 +232,11 @@ mod tests {
 
     #[test]
     fn test() {
-        for inp_len in (0..10000).step_by(300) {
-            for cap in (1..10000).step_by(400) {
+        for inp_len in (0..2000).step_by(51) {
+            for cap in (1..2000).step_by(61) {
                 test_min_with_capacity(inp_len, cap);
                 test_max_with_capacity(inp_len, cap);
+                test_unique(inp_len, cap);
             }
         }
     }

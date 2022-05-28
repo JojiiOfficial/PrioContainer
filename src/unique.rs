@@ -1,28 +1,31 @@
 use crate::{PrioContainer, SortedHeapIter};
-use std::cmp::Reverse;
+use std::{cmp::Reverse, collections::HashSet, hash::Hash};
 
 /// Priority container storing max `capacity` amount of items. Can be used to find
 /// `n` smallest items within an iterator or a set of items that implement `Ord`
 pub struct UniquePrioContainer<T> {
     container: PrioContainer<T>,
+    hash: HashSet<T>,
 }
 
-impl<T: Ord + PartialEq> UniquePrioContainer<T> {
+impl<T: Ord + PartialEq + Clone + Hash> UniquePrioContainer<T> {
     /// Create a new Unique PrioContainer
     #[inline]
     pub fn new(capacity: usize) -> Self {
         let container = PrioContainer::new(capacity);
-        Self { container }
+        let hash = HashSet::with_capacity(capacity);
+        Self { container, hash }
     }
 
     #[inline]
     pub fn insert(&mut self, item: T) -> bool {
+        if self.hash.contains(&item) {
+            return false;
+        }
+
         if self.container.heap.len() < self.container.capacity {
-            if self.contains(&item) {
-                return false;
-            }
-            self.container.pushed += 1;
-            self.container.heap.push(item);
+            self.container.heap.push(item.clone());
+            self.hash.insert(item);
             return true;
         }
 
@@ -30,14 +33,11 @@ impl<T: Ord + PartialEq> UniquePrioContainer<T> {
         //
         // heap.len() >= n without elements is impossible for n>0 which is enforced in `PrioContainer::new()`
         let min_item = unsafe { self.container.heap.peek().unwrap_unchecked() };
-        let contains = self.contains(&item);
-        if *min_item <= item || contains {
-            if !contains {
-                self.container.pushed += 1;
-            }
+        if *min_item <= item {
             return false;
         }
 
+        self.hash.insert(item.clone());
         *unsafe { self.container.heap.peek_mut().unwrap_unchecked() } = item;
         true
     }
@@ -61,15 +61,9 @@ impl<T: Ord + PartialEq> UniquePrioContainer<T> {
     pub fn contains(&self, item: &T) -> bool {
         self.container.heap.iter().any(|i| i == item)
     }
-
-    /// Returns the total amount of pushed items. Ignores duplicates
-    #[inline]
-    pub fn total_pushed(&self) -> usize {
-        self.container.total_pushed()
-    }
 }
 
-impl<T: Ord> Extend<T> for UniquePrioContainer<T> {
+impl<T: Ord + Clone + Hash> Extend<T> for UniquePrioContainer<T> {
     #[inline]
     fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
         for i in iter.into_iter() {
@@ -78,7 +72,7 @@ impl<T: Ord> Extend<T> for UniquePrioContainer<T> {
     }
 }
 
-impl<T: Ord> IntoIterator for UniquePrioContainer<T> {
+impl<T: Ord + Hash> IntoIterator for UniquePrioContainer<T> {
     type Item = T;
     type IntoIter = SortedHeapIter<T>;
 
@@ -94,7 +88,7 @@ pub struct UniquePrioContainerMax<T> {
     container: UniquePrioContainer<Reverse<T>>,
 }
 
-impl<T: Ord + PartialEq> UniquePrioContainerMax<T> {
+impl<T: Ord + PartialEq + Clone + Hash> UniquePrioContainerMax<T> {
     /// Create a new Unique PrioContainer
     #[inline]
     pub fn new(capacity: usize) -> Self {
@@ -121,15 +115,9 @@ impl<T: Ord + PartialEq> UniquePrioContainerMax<T> {
     pub fn is_empty(&self) -> bool {
         self.container.is_empty()
     }
-
-    /// Returns the total amount of pushed items. Ignores duplicates
-    #[inline]
-    pub fn total_pushed(&self) -> usize {
-        self.container.total_pushed()
-    }
 }
 
-impl<T: Ord> Extend<T> for UniquePrioContainerMax<T> {
+impl<T: Ord + Clone + Hash> Extend<T> for UniquePrioContainerMax<T> {
     #[inline]
     fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
         for i in iter.into_iter() {
@@ -138,7 +126,7 @@ impl<T: Ord> Extend<T> for UniquePrioContainerMax<T> {
     }
 }
 
-impl<T: Ord> IntoIterator for UniquePrioContainerMax<T> {
+impl<T: Ord + Hash> IntoIterator for UniquePrioContainerMax<T> {
     type Item = Reverse<T>;
     type IntoIter = SortedHeapIter<Reverse<T>>;
 

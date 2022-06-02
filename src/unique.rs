@@ -17,9 +17,17 @@ impl<T: Ord + PartialEq + Clone + Hash> UniquePrioContainer<T> {
         Self { container, hash }
     }
 
-    #[inline]
     pub fn insert(&mut self, item: T) -> bool {
         if self.hash.contains(&item) {
+            if let Some(old) = self.container.heap.iter().find(|i| **i == item) {
+                if item < *old {
+                    // TODO: Find a more efficient way to replace existing ones
+                    let out: Vec<_> = self.container.heap.drain().filter(|i| *i != item).collect();
+                    self.container.heap.extend(out);
+                    self.container.heap.push(item);
+                    return true;
+                }
+            }
             return false;
         }
 

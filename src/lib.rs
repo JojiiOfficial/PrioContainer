@@ -16,6 +16,13 @@ impl<T: Ord> PrioContainerMax<T> {
         Self { container }
     }
 
+    /// Create a new Max PrioContainer
+    #[inline]
+    pub fn new_allocated(capacity: usize) -> Self {
+        let container = PrioContainer::new_allocated(capacity);
+        Self { container }
+    }
+
     #[inline]
     pub fn insert(&mut self, item: T) -> bool {
         self.container.insert(Reverse(item))

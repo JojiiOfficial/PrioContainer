@@ -13,6 +13,14 @@ impl<T: Ord + PartialEq + Clone + Hash> UniquePrioContainer<T> {
     #[inline]
     pub fn new(capacity: usize) -> Self {
         let container = PrioContainer::new(capacity);
+        let hash = HashSet::new();
+        Self { container, hash }
+    }
+
+    /// Create a new Unique PrioContainer
+    #[inline]
+    pub fn new_allocated(capacity: usize) -> Self {
+        let container = PrioContainer::new_allocated(capacity);
         let hash = HashSet::with_capacity(capacity);
         Self { container, hash }
     }
@@ -101,6 +109,13 @@ impl<T: Ord + PartialEq + Clone + Hash> UniquePrioContainerMax<T> {
     #[inline]
     pub fn new(capacity: usize) -> Self {
         let container = UniquePrioContainer::new(capacity);
+        Self { container }
+    }
+
+    /// Create a new Unique PrioContainer
+    #[inline]
+    pub fn new_allocated(capacity: usize) -> Self {
+        let container = UniquePrioContainer::new_allocated(capacity);
         Self { container }
     }
 

@@ -81,12 +81,23 @@ impl<T: Ord> PrioContainer<T> {
         if capacity == 0 {
             panic!("Capacity can't be zero");
         }
-        let heap = BinaryHeap::with_capacity(capacity);
+        let heap = BinaryHeap::new();
         Self {
             heap,
             capacity,
             pushed: 0,
         }
+    }
+
+    /// Create a new PrioContainerMin with already allocated spaces
+    ///
+    /// # Panics
+    /// Panics if `capacity` is zero
+    #[inline]
+    pub fn new_allocated(capacity: usize) -> Self {
+        let mut queue = Self::new(capacity);
+        queue.heap.reserve(capacity);
+        queue
     }
 
     /// Inserts a new Item into the queue.

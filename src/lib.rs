@@ -1,3 +1,4 @@
+mod stable_item;
 pub mod unique;
 
 use std::{cmp::Reverse, collections::BinaryHeap};
@@ -119,12 +120,12 @@ impl<T: Ord> PrioContainer<T> {
         // Safety:
         //
         // heap.len() >= n without elements is impossible for n>0 which is enforced in `PrioContainer::new()`
-        let mut min_item = unsafe { self.heap.peek_mut().unwrap_unchecked() };
-        if *min_item <= item {
+        let mut max_item = unsafe { self.heap.peek_mut().unwrap_unchecked() };
+        if *max_item <= item {
             return false;
         }
 
-        *min_item = item;
+        *max_item = item;
         true
     }
 
@@ -246,6 +247,15 @@ mod tests {
         let mut out = prio_container.into_iter().collect::<Vec<_>>();
         out.reverse();
         assert_eq!(out, expected);
+    }
+
+    #[test]
+    fn test_other() {
+        let mut queue = PrioContainer::new(2);
+        queue.insert(3);
+        queue.insert(5);
+        queue.insert(10);
+        assert_eq!(queue.into_sorted_vec(), vec![3, 5]);
     }
 
     #[test]

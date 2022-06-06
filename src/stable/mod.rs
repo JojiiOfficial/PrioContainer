@@ -7,9 +7,9 @@ use std::collections::BinaryHeap;
 
 /// A stable priority container. This means equal elements are returned in inserted order
 pub struct StablePrioContainer<T> {
-    heap: BinaryHeap<HeapItem<T>>,
-    total_pushed: usize,
-    capacity: usize,
+    pub(crate) heap: BinaryHeap<HeapItem<T>>,
+    pub(crate) total_pushed: usize,
+    pub(crate) capacity: usize,
 }
 
 impl<T: Ord> StablePrioContainer<T> {

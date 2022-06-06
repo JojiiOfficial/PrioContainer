@@ -2,12 +2,14 @@ pub mod iter;
 pub mod stable;
 pub mod unique;
 
-pub use stable::max::StablePrioContainerMax;
-pub use stable::StablePrioContainer;
-
-use std::{cmp::Reverse, collections::BinaryHeap};
+pub use stable::{max::StablePrioContainerMax, StablePrioContainer};
+pub use unique::{
+    max::UniquePrioContainerMax, stable::StableUniquePrioContainer,
+    stable_max::StableUniquePrioContainerMax, UniquePrioContainer,
+};
 
 use iter::SortedHeapIter;
+use std::{cmp::Reverse, collections::BinaryHeap};
 
 /// Priority container storing max `capacity` amount of items. Can be used to find
 /// `n` smallest items within an iterator or a set of items that implement `Ord`

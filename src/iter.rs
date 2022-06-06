@@ -1,6 +1,5 @@
-use std::{cmp::Reverse, collections::BinaryHeap};
-
 use crate::stable::item::HeapItem;
+use std::{cmp::Reverse, collections::BinaryHeap};
 
 /// Iterator over a binary heap sorted
 pub struct SortedHeapIter<T> {
@@ -20,6 +19,33 @@ impl<T: Ord> Iterator for SortedHeapIter<T> {
     #[inline(always)]
     fn next(&mut self) -> Option<T> {
         self.inner.pop()
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let exact = self.inner.len();
+        (exact, Some(exact))
+    }
+}
+
+/// Iterator over a binary heap sorted
+pub struct SortedHeapIterMax<T> {
+    inner: BinaryHeap<Reverse<T>>,
+}
+
+impl<T: Ord> SortedHeapIterMax<T> {
+    #[inline]
+    pub(crate) fn new(heap: BinaryHeap<Reverse<T>>) -> Self {
+        Self { inner: heap }
+    }
+}
+
+impl<T: Ord> Iterator for SortedHeapIterMax<T> {
+    type Item = T;
+
+    #[inline(always)]
+    fn next(&mut self) -> Option<T> {
+        self.inner.pop().map(|i| i.0)
     }
 
     #[inline]

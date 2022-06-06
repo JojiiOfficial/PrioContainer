@@ -1,6 +1,6 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, hash::Hash};
 
-use priority_container::{unique::UniquePrioContainerMax, *};
+use priority_container::{unique::max::UniquePrioContainerMax, *};
 use rand::{thread_rng, Rng};
 
 fn generate_data(inp_len: usize) -> Vec<usize> {
@@ -103,6 +103,12 @@ fn test_stability_simple() {
 struct UniqueItem<T> {
     item: T,
     val: u32,
+}
+
+impl<T: Hash> Hash for UniqueItem<T> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.item.hash(state);
+    }
 }
 
 impl<T> UniqueItem<T> {

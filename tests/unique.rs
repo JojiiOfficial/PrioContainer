@@ -43,22 +43,22 @@ impl<T> UniqueItem<T> {
     }
 }
 
-impl<T> PartialEq for UniqueItem<T> {
+impl<T: PartialEq> PartialEq for UniqueItem<T> {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
-        self.val == other.val
+        self.item == other.item
     }
 }
 
-impl<T> Eq for UniqueItem<T> {}
+impl<T: PartialEq> Eq for UniqueItem<T> {}
 
-impl<T> PartialOrd for UniqueItem<T> {
+impl<T: PartialEq> PartialOrd for UniqueItem<T> {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         self.val.partial_cmp(&other.val)
     }
 }
 
-impl<T> Ord for UniqueItem<T> {
+impl<T: PartialEq> Ord for UniqueItem<T> {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.val.cmp(&other.val)
     }
@@ -77,7 +77,6 @@ impl<T: Clone> Clone for UniqueItem<T> {
 #[test]
 fn test_stability_simple_unique() {
     for _ in 0..1000 {
-        println!("-------");
         let mut heap = StableUniquePrioContainer::new(10);
 
         for _ in 0..20 {

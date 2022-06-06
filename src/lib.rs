@@ -1,7 +1,13 @@
-mod stable_item;
+pub mod iter;
+pub mod stable;
 pub mod unique;
 
+pub use stable::max::StablePrioContainerMax;
+pub use stable::StablePrioContainer;
+
 use std::{cmp::Reverse, collections::BinaryHeap};
+
+use iter::SortedHeapIter;
 
 /// Priority container storing max `capacity` amount of items. Can be used to find
 /// `n` smallest items within an iterator or a set of items that implement `Ord`
@@ -178,121 +184,5 @@ impl<T: Ord> IntoIterator for PrioContainer<T> {
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
         SortedHeapIter::new(self.heap)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::collections::HashSet;
-
-    use crate::unique::UniquePrioContainerMax;
-
-    use super::*;
-    use rand::{thread_rng, Rng};
-
-    fn generate_data(inp_len: usize) -> Vec<usize> {
-        let mut input = vec![0usize; inp_len];
-        thread_rng().try_fill(&mut input[..]).unwrap();
-        input
-    }
-
-    fn test_unique(inp_len: usize, capacity: usize) {
-        let mut input = generate_data(inp_len)
-            .into_iter()
-            // unique items only
-            .collect::<HashSet<_>>()
-            .into_iter()
-            .collect::<Vec<_>>();
-
-        // add duplicates
-        for val in input.clone().into_iter().step_by(10) {
-            input.push(val);
-        }
-
-        let mut expected = input.clone();
-        expected.sort();
-        expected.reverse();
-        expected.truncate(capacity);
-
-        let mut prio_container = UniquePrioContainerMax::new(capacity);
-        prio_container.extend(input);
-
-        let collected: Vec<_> = prio_container.into_iter().collect();
-        let unique = collected.iter().copied().collect::<HashSet<_>>();
-        assert_eq!(unique.len(), collected.len());
-    }
-
-    fn test_max_with_capacity(inp_len: usize, capacity: usize) {
-        let input = generate_data(inp_len);
-        let mut expected = input.clone();
-        expected.sort();
-        expected.reverse();
-        expected.truncate(capacity);
-
-        let mut prio_container = PrioContainerMax::new(capacity);
-        prio_container.extend(input);
-        let mut out = prio_container.into_iter().map(|i| i.0).collect::<Vec<_>>();
-        out.reverse();
-        assert_eq!(out, expected);
-    }
-
-    fn test_min_with_capacity(inp_len: usize, capacity: usize) {
-        let input = generate_data(inp_len);
-        let mut expected = input.clone();
-        expected.sort();
-        expected.truncate(capacity);
-
-        let mut prio_container = PrioContainer::new(capacity);
-        prio_container.extend(input);
-        let mut out = prio_container.into_iter().collect::<Vec<_>>();
-        out.reverse();
-        assert_eq!(out, expected);
-    }
-
-    #[test]
-    fn test_other() {
-        let mut queue = PrioContainer::new(2);
-        queue.insert(3);
-        queue.insert(5);
-        queue.insert(10);
-        assert_eq!(queue.into_sorted_vec(), vec![3, 5]);
-    }
-
-    #[test]
-    fn test() {
-        for inp_len in (0..2000).step_by(51) {
-            for cap in (1..2000).step_by(61) {
-                test_min_with_capacity(inp_len, cap);
-                test_max_with_capacity(inp_len, cap);
-                test_unique(inp_len, cap);
-            }
-        }
-    }
-}
-
-/// Iterator over a binary heap sorted
-pub struct SortedHeapIter<T> {
-    inner: BinaryHeap<T>,
-}
-
-impl<T: Ord> SortedHeapIter<T> {
-    #[inline]
-    fn new(heap: BinaryHeap<T>) -> Self {
-        Self { inner: heap }
-    }
-}
-
-impl<T: Ord> Iterator for SortedHeapIter<T> {
-    type Item = T;
-
-    #[inline(always)]
-    fn next(&mut self) -> Option<T> {
-        self.inner.pop()
-    }
-
-    #[inline]
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        let exact = self.inner.len();
-        (exact, Some(exact))
     }
 }

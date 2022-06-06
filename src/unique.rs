@@ -4,7 +4,7 @@ use std::{
     hash::Hash,
 };
 
-use crate::stable_item::HeapItem;
+use crate::{iter::StableHeapIter, stable::item::HeapItem};
 
 /// Priority container storing max `capacity` amount of items. Can be used to find
 /// `n` smallest items within an iterator or a set of items that implement `Ord`.
@@ -131,38 +131,11 @@ impl<T: Ord + Clone + Hash> Extend<T> for UniquePrioContainer<T> {
 
 impl<T: Ord> IntoIterator for UniquePrioContainer<T> {
     type Item = T;
-    type IntoIter = SortedHeapIter<T>;
+    type IntoIter = StableHeapIter<T>;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        SortedHeapIter::new(self.container)
-    }
-}
-
-/// Iterator over a binary heap sorted
-pub struct SortedHeapIter<T> {
-    inner: BinaryHeap<HeapItem<T>>,
-}
-
-impl<T> SortedHeapIter<T> {
-    #[inline]
-    fn new(heap: BinaryHeap<HeapItem<T>>) -> Self {
-        Self { inner: heap }
-    }
-}
-
-impl<T: Ord> Iterator for SortedHeapIter<T> {
-    type Item = T;
-
-    #[inline(always)]
-    fn next(&mut self) -> Option<T> {
-        self.inner.pop().map(|i| i.into_inner())
-    }
-
-    #[inline]
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        let exact = self.inner.len();
-        (exact, Some(exact))
+        StableHeapIter::new(self.container)
     }
 }
 

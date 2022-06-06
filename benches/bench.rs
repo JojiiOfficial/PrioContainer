@@ -1,5 +1,5 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use priority_container::unique::UniquePrioContainerMax;
+use priority_container::UniquePrioContainerMax;
 use rand::prelude::*;
 
 fn overlapping(c: &mut Criterion) {

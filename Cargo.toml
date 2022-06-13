@@ -1,6 +1,6 @@
 [package]
 name = "priority_container"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Datastructure to find n biggest/smallest items within a large set"
 license-file = "./LICENSE"

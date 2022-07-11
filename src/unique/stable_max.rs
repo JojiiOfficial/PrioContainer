@@ -45,6 +45,11 @@ impl<T: Ord + Hash + Clone> StableUniquePrioContainerMax<T> {
     pub fn into_sorted_vec(self) -> Vec<T> {
         self.into_iter().collect()
     }
+
+    #[inline]
+    pub fn inc_push(&mut self, delta: usize) {
+        self.heap.inc_push(delta)
+    }
 }
 
 impl<T> StableUniquePrioContainerMax<T> {

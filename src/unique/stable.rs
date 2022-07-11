@@ -43,6 +43,11 @@ impl<T: Ord + Clone + Hash> StableUniquePrioContainer<T> {
         self.container.contains(item)
     }
 
+    #[inline]
+    pub fn inc_push(&mut self, delta: usize) {
+        self.container.inc_push(delta)
+    }
+
     /// Replaces an already pushed item with `item` if their hashes are equal
     /// and `item`'s relevance is bigger
     fn replace_eq(&mut self, item: T) {

@@ -70,6 +70,12 @@ impl<T: Ord> StablePrioContainer<T> {
 
         true
     }
+
+    #[inline]
+    pub fn inc_push(&mut self, delta: usize) {
+        self.total_pushed += delta;
+    }
+
     #[inline]
     pub fn contains(&self, item: &T) -> bool {
         self.heap.iter().any(|i| *i.as_ref() == *item)

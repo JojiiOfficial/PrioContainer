@@ -103,7 +103,7 @@ impl<T> StablePrioContainer<T> {
 
     #[inline]
     pub fn capacity(&self) -> usize {
-        self.heap.capacity()
+        self.capacity
     }
 
     #[inline]
